@@ -1853,7 +1853,7 @@
       "enrollment",
       "hivLastTenClinicalEncounters"
     ],
-    "incompatibleWith": [],
+    "incompatibleWith": ["96ba279b-b23b-4e78-aba9-dcbd46a96b7b"],
     "visitTypes": [
       {
         "uuid": "0883d972-4122-454d-a746-9d28ecb23b66",
@@ -3028,7 +3028,10 @@
       "334c9e98-173f-4454-a8ce-f80b20b7fdf0",
       "781d8880-1359-11df-a1f1-0026b9348838",
       "0904172d-0b6a-40df-b8a2-b3653d16dc45",
-      "a8e7c30d-6d2f-401c-bb52-d4433689a36b"
+      "a8e7c30d-6d2f-401c-bb52-d4433689a36b",
+      "781d8768-1359-11df-a1f1-0026b9348838",
+      "4480c782-ef05-4d88-b2f8-c892c99438f6",
+      "c4246ff0-b081-460c-bcc5-b0678012659e"
     ],
     "visitTypes": [
       {
@@ -4088,7 +4091,8 @@
     "name": "VIREMIA PROGRAM",
     "incompatibleWith": [
       "781d85b0-1359-11df-a1f1-0026b9348838",
-      "334c9e98-173f-4454-a8ce-f80b20b7fdf0"
+      "334c9e98-173f-4454-a8ce-f80b20b7fdf0",
+      "96ba279b-b23b-4e78-aba9-dcbd46a96b7b"
     ],
     "dataDependencies": [
       "patient",
