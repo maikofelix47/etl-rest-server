@@ -6,7 +6,7 @@ const gainsLossesIndicatorDefs = require('../../app/reporting-framework/hiv/gain
 const etlHelpers = require('../../etl-helpers.js');
 const patientListCols = require('../../app/reporting-framework/json-reports/gains-and-losses/gains-and-losses-patient-list-cols.json');
 const Moment = require('moment');
-const dao = require('../../etl-dao');
+const gainsAndLossesSections = require('../../app/reporting-framework/hiv/hiv-monthly-gains-and-losses-sections.json');
 export class HIVGainsAndLossesService extends MultiDatasetPatientlistReport {
   constructor(reportName, params) {
     super(reportName, params);
@@ -68,7 +68,9 @@ export class HIVGainsAndLossesService extends MultiDatasetPatientlistReport {
                   proxyRetention: proxyRetention,
                   sectionDefinitions: gainsLossesIndicatorDefs,
                   indicatorDefinitions: [],
-                  isDraftReport: this.deterMineIfDraftReport(sourceTables)
+                  isDraftReport: this.deterMineIfDraftReport(sourceTables),
+                  gainsAndLossesSections: gainsAndLossesSections,
+                  resultTotals: this.generateTotalsColumn(finalResult)
                 });
               }
             })
@@ -200,5 +202,31 @@ export class HIVGainsAndLossesService extends MultiDatasetPatientlistReport {
     }
 
     return isDraft;
+  }
+  generateTotalsColumn(results) {
+    let totalResults = [];
+    let resultRow = {
+      location_uuid: [],
+      location: 'Total',
+      reporting_month: ''
+    };
+    results.forEach((locationResult) => {
+      Object.entries(locationResult).forEach(([key, value]) => {
+        if (
+          typeof value === 'number' &&
+          key !== 'location_id' &&
+          key !== 'person_id'
+        ) {
+          resultRow[key] = value + (resultRow[key] ? resultRow[key] : 0);
+        } else if (key === 'location_uuid') {
+          resultRow.location_uuid.push(value);
+        } else if (key === 'reporting_month') {
+          resultRow.reporting_month = value;
+        } else {
+        }
+      });
+    });
+    totalResults.push(resultRow);
+    return totalResults;
   }
 }
