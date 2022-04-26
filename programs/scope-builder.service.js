@@ -10,7 +10,10 @@ module.exports = def;
 function buildScope(dataDictionary) {
   const scope = {
     isPatientTransferredOut: false,
-    isFirstAMPATHHIVVisit: true
+    isFirstAMPATHHIVVisit: true,
+    lastCovidScreeningDate: '',
+    retroSpective: false,
+    screenedForCovid: false
   };
 
   if (dataDictionary.patient) {
@@ -72,9 +75,25 @@ function buildScope(dataDictionary) {
     );
   }
 
+  if (dataDictionary.retroSpective) {
+    scope.retroSpective = dataDictionary.retroSpective;
+  }
+
   if (dataDictionary.isPatientTransferredOut) {
     scope['isPatientTransferredOut'] = dataDictionary.isPatientTransferredOut;
   }
+
+  if (dataDictionary.latestCovidAssessment) {
+    scope['lastCovidScreeningDate'] = dataDictionary.latestCovidAssessment;
+    const screeningDate = Moment(dataDictionary.latestCovidAssessment);
+    const visitDate = Moment(dataDictionary.visitDate);
+    if (screeningDate >= visitDate) {
+      scope.screenedForCovid = true;
+    }
+  }
+
+  // console.log('dataDictionary', dataDictionary);
+  // console.log('scope', scope);
 
   // add other methods to build the scope objects
   return scope;

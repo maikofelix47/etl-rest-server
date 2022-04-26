@@ -2,6 +2,7 @@ const Promise = require('bluebird');
 const scopeBuilder = require('./scope-builder.service');
 const dataResolver = require('./patient-data-resolver.service');
 const expressionRunner = require('../expression-runner/expression-runner');
+const encounterType = require('../dao/encounter-type/encounter-type-dao');
 
 const def = {
   isVisitTypeAllowed: isVisitTypeAllowed,
@@ -18,7 +19,19 @@ function isVisitTypeAllowed(scope, visitType) {
   return expressionRunner.run(visitType.allowedIf, scope);
 }
 
+function isEncounterTypeAllowed(scope, encounterType) {
+  if (!encounterType.allowedIf) {
+    return true;
+  }
+  // console.log('Before run data scope', scope);
+  const rundata = expressionRunner.run(encounterType.allowedIf, scope);
+  console.log('rundata', rundata);
+  return rundata;
+}
+
 function separateAllowedDisallowedVisitTypes(scope, visitTypes) {
+  console.log('separateAllowedDisallowedVisitTypes : scope', scope);
+  console.log('separateAllowedDisallowedVisitTypes : visitTypes', visitTypes);
   const separated = {
     allowed: [],
     disallowed: []
@@ -27,6 +40,16 @@ function separateAllowedDisallowedVisitTypes(scope, visitTypes) {
   if (Array.isArray(visitTypes)) {
     visitTypes.forEach((item) => {
       if (isVisitTypeAllowed(scope, item)) {
+        console.log('item', item);
+        const encounterTypes = item.encounterTypes;
+        const allowedEncounterTypes = encounterTypes.filter((e) => {
+          return isEncounterTypeAllowed(scope, e);
+        });
+
+        item.encounterTypes = allowedEncounterTypes;
+
+        console.log('Allowed encounter types', allowedEncounterTypes);
+
         separated.allowed.push(item);
       } else {
         separated.disallowed.push(item);
@@ -41,7 +64,9 @@ function getPatientVisitTypes(
   programUuid,
   programEnrollmentUuid,
   intendedVisitLocationUuid,
-  allProgramsConfig
+  allProgramsConfig,
+  retroSpective,
+  visitDate
 ) {
   return new Promise((success, error) => {
     const program = allProgramsConfig[programUuid];
@@ -61,9 +86,11 @@ function getPatientVisitTypes(
         // add missing properties
         dataObject.programUuid = programUuid;
         dataObject.intendedVisitLocationUuid = intendedVisitLocationUuid;
-
+        dataObject.retroSpective = retroSpective;
+        dataObject.visitDate = visitDate;
         // build scope
         const scopeObj = scopeBuilder.buildScope(dataObject);
+        // console.log('scopeObj', scopeObj);
         const visits = program.visitTypes;
 
         program.visitTypes = separateAllowedDisallowedVisitTypes(

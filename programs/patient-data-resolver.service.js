@@ -4,6 +4,7 @@ const patientService = require('../service/openmrs-rest/patient.service.js');
 const programService = require('../service/openmrs-rest/program.service');
 const etlHivSummary = require('../dao/patient/etl-patient-hiv-summary-dao');
 const encounterService = require('../service/openmrs-rest/encounter');
+const covidAssessmentService = require('../service/covid-assessment-service');
 var _ = require('underscore');
 
 const availableKeys = {
@@ -14,7 +15,8 @@ const availableKeys = {
   hivLastEncounter: getPatientLastEncounter,
   patientEnrollment: getPatientEnrollement,
   patientEncounters: getPatientEncounters,
-  isPatientTransferredOut: checkTransferOut
+  isPatientTransferredOut: checkTransferOut,
+  latestCovidAssessment: getLatestCovidAssessment
 };
 
 const def = {
@@ -25,7 +27,8 @@ const def = {
   availableKeys: availableKeys,
   getPatientLastEncounter: getPatientLastEncounter,
   getPatientEncounters: getPatientEncounters,
-  checkTransferOut: checkTransferOut
+  checkTransferOut: checkTransferOut,
+  getLatestCovidAssessment: getLatestCovidAssessment
 };
 
 module.exports = def;
@@ -158,6 +161,26 @@ function getPatientEnrollement(patientUuid, params) {
       .getProgramEnrollmentByPatientUuid(patientUuid, params)
       .then((response) => {
         resolve(response.results);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+function getLatestCovidAssessment(patientUuid) {
+  return new Promise((resolve, reject) => {
+    covidAssessmentService
+      .getPatientLatestCovidAssessmentDate(patientUuid)
+      .then((result) => {
+        // console.log('results', result);
+        if (result.size > 0) {
+          const screeningDate = result.result[0].latest_covid_assessment_date;
+          // console.log('secreeningDate', screeningDate);
+          resolve(screeningDate);
+        } else {
+          resolve('');
+        }
       })
       .catch((error) => {
         reject(error);

@@ -5,7 +5,8 @@
       "patient",
       "enrollment",
       "patientEncounters",
-      "isPatientTransferredOut"
+      "isPatientTransferredOut",
+      "latestCovidAssessment"
     ],
     "enrollmentOptions": {
       "requiredProgramQuestions": [
@@ -74,7 +75,8 @@
           },
           {
             "uuid": "8d5b27bc-c2cc-11de-8d13-0010c6dffd0f",
-            "display": "ADULTINITIAL"
+            "display": "ADULTINITIAL",
+            "allowedIf": "!retroSpective || screenedForCovid"
           },
           {
             "uuid": "cbe2d31d-2201-44ce-b52e-fbd5dc7cff33",
@@ -131,7 +133,8 @@
           },
           {
             "uuid": "8d5b2be0-c2cc-11de-8d13-0010c6dffd0f",
-            "display": "ADULTRETURN"
+            "display": "ADULTRETURN",
+            "allowedIf": "!retroSpective || screenedForCovid"
           },
           {
             "uuid": "df55584c-1350-11df-a1f1-0026b9348838",
@@ -200,7 +203,8 @@
           },
           {
             "uuid": "8d5b2be0-c2cc-11de-8d13-0010c6dffd0f",
-            "display": "ADULTRETURN"
+            "display": "ADULTRETURN",
+            "allowedIf": "!retroSpective || screenedForCovid"
           },
           {
             "uuid": "df55584c-1350-11df-a1f1-0026b9348838",
@@ -1159,7 +1163,8 @@
       "hivLastTenClinicalEncounters",
       "patientEnrollment",
       "patientEncounters",
-      "isPatientTransferredOut"
+      "isPatientTransferredOut",
+      "latestCovidAssessment"
     ],
     "enrollmentOptions": {
       "enrollIf": "gender === 'F'",
@@ -2374,7 +2379,8 @@
     "dataDependencies": [
       "patient",
       "enrollment",
-      "hivLastTenClinicalEncounters"
+      "hivLastTenClinicalEncounters",
+      "latestCovidAssessment"
     ],
     "enrollmentOptions": {
       "requiredProgramQuestions": [
@@ -2596,7 +2602,8 @@
       "hivLastTenClinicalEncounters",
       "hivLastEncounter",
       "patientEncounters",
-      "isPatientTransferredOut"
+      "isPatientTransferredOut",
+      "latestCovidAssessment"
     ],
     "enrollmentOptions": {
       "requiredProgramQuestions": [
@@ -4080,7 +4087,8 @@
       "hivLastTenClinicalEncounters",
       "patientEnrollment",
       "isPatientTransferredOut",
-      "patientEncounters"
+      "patientEncounters",
+      "latestCovidAssessment"
     ],
     "enrollmentOptions": {
       "requiredProgramQuestions": [
