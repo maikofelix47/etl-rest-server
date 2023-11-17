@@ -3,10 +3,6 @@ import { Promise } from 'bluebird';
 import QueryService from '../database-access/query.service';
 import ReportProcessorHelpersService from './report-processor-helpers.service';
 
-import * as patient_list_template_test from './json-reports/patient-list-template-test.json';
-import * as hiv_monthly_report_base from './json-reports/hiv-monthly-report-base.json';
-import * as hiv_monthly_report_aggregate from './json-reports/hiv-monthly-report-aggregate.json';
-
 export class BaseMysqlReport {
   constructor(reportName, params) {
     this.reportName = reportName;
@@ -65,20 +61,9 @@ export class BaseMysqlReport {
   fetchReportSchema(reportName, version) {
     return new Promise((resolve, reject) => {
       switch (reportName) {
-        case 'patient-list-template-test':
+        case 'test':
           resolve({
-            main: this.cloneJsonSchema(patient_list_template_test) //patient_list_test_template
-          });
-          break;
-        case 'hivMonthlyReportAggregate':
-          resolve({
-            main: this.cloneJsonSchema(hiv_monthly_report_aggregate),
-            hivMonthlyReportBase: this.cloneJsonSchema(hiv_monthly_report_base)
-          });
-          break;
-        case 'hivMonthlyReportBase':
-          resolve({
-            main: this.cloneJsonSchema(hiv_monthly_report_base)
+            main: this.cloneJsonSchema('') //patient_list_test_template
           });
           break;
         default:
