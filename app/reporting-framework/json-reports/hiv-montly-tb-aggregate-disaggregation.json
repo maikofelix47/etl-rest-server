@@ -1,0 +1,49 @@
+{
+  "name": "hivMonthlyTbAggregateDisaggregation",
+  "version": "1.0",
+  "tag": "",
+  "description": "",
+  "uses": [],
+  "sources": [
+    {
+      "dataSet": "hivMonthlyTbBase",
+      "alias": "b"
+    }
+  ],
+  "columns": [
+    {
+      "type": "simple_column",
+      "alias": "age_range",
+      "column": "b.age_range"
+    },
+    {
+      "type": "simple_column",
+      "alias": "gender",
+      "column": "b.gender"
+    },
+    {
+      "type": "simple_column",
+      "alias": "end_date",
+      "column": "b.end_date"
+    },
+    {
+      "type": "derived_column",
+      "alias": "total_on_tb",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "SUM(b.on_tb)"
+      }
+    }
+  ],
+  "transFormDirectives": {
+    "joinColumn": "end_date",
+    "joinColumnParam": "",
+    "skipColumns": [""],
+    "disaggregationColumns": ["gender", "age_range"]
+  },
+  "groupBy": {
+    "groupParam": "groupByParam",
+    "columns": ["end_date", "on_tb","age_range","gender"],
+    "excludeParam": "excludeParam"
+  }
+}

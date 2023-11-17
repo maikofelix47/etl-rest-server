@@ -1,0 +1,76 @@
+{
+    "name": "hivMonthlyTbBase",
+    "version": "1.0",
+    "tag": "",
+    "description": "",
+    "uses": [],
+    "sources": [
+      {
+        "table": "etl.hiv_monthly_tb",
+        "alias": "hmt"
+      }
+    ],
+    "columns": [
+      {
+        "type": "simple_column",
+        "alias": "person_id",
+        "column": "hmt.person_id"
+      },
+      {
+        "type": "simple_column",
+        "alias": "on_tb",
+        "column": "hmt.on_tb"
+      },
+      {
+        "type": "simple_column",
+        "alias": "gender",
+        "column": "hmt.gender"
+      },
+      {
+        "type": "derived_column",
+        "alias": "age_range",
+        "expressionType": "simple_expression",
+        "expressionOptions": {
+          "caseOptions": [
+            {
+              "condition": "age between 16 and 20",
+              "value": "16_20"
+            },
+            {
+                "condition": "age between 21 and 25",
+                "value": "21_25"
+            },
+            {
+                "condition": "age between 26 and 30",
+                "value": "26_30"
+            },
+            {
+                "condition": "age between 31 and 35",
+                "value": "31_35"
+            }
+          ]
+        }
+      },
+      {
+        "type": "simple_column",
+        "alias": "age",
+        "column": "hmt.age"
+      },
+      {
+        "type": "simple_column",
+        "alias": "end_date",
+        "column": "DATE_FORMAT(hmt.end_date,'%Y-%m-%d')"
+      }
+    ],
+    "filters": {
+      "conditionJoinOperator": "and",
+      "conditions": [
+        {
+            "filterType": "tableColumns",
+            "conditionExpression": "hmt.end_date = ?)",
+            "parameterName": "startDate"
+          }
+      ]
+    }
+  }
+  

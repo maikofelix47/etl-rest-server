@@ -2,6 +2,9 @@ import { Json2Sql } from 'ampath-json2sql';
 import { Promise } from 'bluebird';
 import QueryService from '../database-access/query.service';
 import ReportProcessorHelpersService from './report-processor-helpers.service';
+import * as hiv_monthly_tb_base from './json-reports/hiv-montly-tb-base.json';
+import * as hiv_monthly_tb_aggregate from './json-reports/hiv-montly-tb-aggregate.json';
+import * as hiv_monthly_tb_aggregate_disaggregated from './json-reports/hiv-montly-tb-aggregate-disaggregation.json';
 
 export class BaseMysqlReport {
   constructor(reportName, params) {
@@ -27,17 +30,18 @@ export class BaseMysqlReport {
             .then((sqlQuery) => {
               // allow user to use 'null' as parameter values
               sqlQuery = sqlQuery.replace(/\'null\'/g, 'null');
-
+              // console.log({ sqlQuery });
               that.reportQuery = sqlQuery;
               // run query
               that
                 .executeReportQuery(that.reportQuery)
                 .then((result) => {
+                  // console.dir({ result }, { depth: null });
                   return that.transFormResults(that.reportSchemas, result);
                 })
                 .then((results) => {
                   that.queryResults = results;
-
+                  // console.dir({ results }, { depth: null });
                   resolve({
                     schemas: that.reportSchemas,
                     sqlQuery: that.reportQuery,
@@ -61,11 +65,21 @@ export class BaseMysqlReport {
   fetchReportSchema(reportName, version) {
     return new Promise((resolve, reject) => {
       switch (reportName) {
-        case 'test':
+        case 'hivMonthlyTbBase':
           resolve({
-            main: this.cloneJsonSchema('') //patient_list_test_template
+            main: this.cloneJsonSchema(hiv_monthly_tb_base) //patient_list_test_template
           });
           break;
+        case 'hivMonthlyTbAggregate':
+          resolve({
+            main: this.cloneJsonSchema(hiv_monthly_tb_aggregate),
+            hivMonthlyTbBase: this.cloneJsonSchema(hiv_monthly_tb_base)
+          });
+        case 'hivMonthlyTbAggregateDisaggregation':
+          resolve({
+            main: this.cloneJsonSchema(hiv_monthly_tb_aggregate_disaggregated),
+            hivMonthlyTbBase: this.cloneJsonSchema(hiv_monthly_tb_base)
+          });
         default:
           reject('Unknown report ', reportName);
           break;
@@ -77,6 +91,7 @@ export class BaseMysqlReport {
     // console.log('Passed params', params)
     // console.log('report schemas', JSON.stringify(reportSchemas, null, 4));
     let jSql = this.getJson2Sql(reportSchemas, params);
+    // console.log({ jSql });
     return new Promise((resolve, reject) => {
       try {
         resolve(jSql.generateSQL().toString());

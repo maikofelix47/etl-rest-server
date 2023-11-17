@@ -28,6 +28,7 @@ export default class ReportProcessorHelpersService {
       options.joinColumn,
       'children'
     );
+    console.log({ initialGrouped });
     let result = [];
     for (let w of initialGrouped) {
       let grouped = _.groupByComposite(w.children, options.use);

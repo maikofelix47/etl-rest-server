@@ -1,0 +1,34 @@
+{
+    "name": "hivMonthlyTbAggregate",
+    "version": "1.0",
+    "tag": "",
+    "description": "",
+    "uses": [],
+    "sources": [
+      {
+        "dataSet": "hivMonthlyTbBase",
+        "alias": "b"
+      }
+    ],
+    "columns": [
+      {
+        "type": "simple_column",
+        "alias": "end_date",
+        "column": "b.end_date"
+      },
+      {
+        "type": "derived_column",
+        "alias": "total_on_tb",
+        "expressionType": "simple_expression",
+        "expressionOptions": {
+          "expression": "SUM(b.on_tb)"
+        }
+      }
+    ],
+    "groupBy": {
+      "groupParam": "groupByParam",
+      "columns": ["end_date","on_tb"],
+      "excludeParam": "excludeParam"
+    }
+  }
+  
