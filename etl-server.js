@@ -14,7 +14,6 @@ try {
   var tls = require('tls');
   var fs = require('fs');
   var routes = require('./etl-routes');
-  var elasticRoutes = require('./elastic/routes/care.treatment.routes');
   var Inert = require('inert');
   var Vision = require('vision');
   var HapiSwagger = require('hapi-swagger');
@@ -40,12 +39,6 @@ try {
   });
 
   var tls_config = false;
-  if (config.etl.tls) {
-    tls_config = tls.createServer({
-      key: fs.readFileSync(config.etl.key),
-      cert: fs.readFileSync(config.etl.cert)
-    });
-  }
 
   if (config.testMode === true) {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -54,94 +47,18 @@ try {
   server.connection({
     port: config.etl.port,
     host: config.etl.host,
-    tls: tls_config,
+    tls: false,
     routes: { log: true }
   });
   var pool = mysql.createPool(config.mysql);
 
   var validate = function (username, password, callback) {
-    try {
-      //Openmrs context
-      var openmrsAppName = config.openmrs.applicationName || 'amrs';
-      var authBuffer = new Buffer(username + ':' + password).toString('base64');
-      var options = {
-        hostname: config.openmrs.host,
-        port: config.openmrs.port,
-        path: '/' + openmrsAppName + '/ws/rest/v1/session',
-        headers: {
-          Authorization: 'Basic ' + authBuffer
-        }
-      };
-      var key = username;
-      if (config.openmrs.https) {
-        https = require('https');
-      }
-      var session = cache.getFromToCache(key);
-      if (session !== null) {
-        options.headers['Cookie'] = session.session;
-        delete options.headers.Authorization;
-      }
-      https
-        .get(options, function (res) {
-          var body = '';
-          res.on('data', function (chunk) {
-            body += chunk;
-          });
-          res.on('end', function () {
-            var result;
-            try {
-              result = JSON.parse(body);
-            } catch (err) {
-              if (session !== null) {
-                cache.removeFromCache(key);
-                return validate(username, password, callback);
-              } else {
-                return callback(null, false);
-              }
-            }
-            if (result.authenticated === true) {
-              authorizer.setUser(result.user);
-              authorizer.getUserAuthorizedLocations(
-                result.user.userProperties,
-                function (authorizedLocations) {
-                  var currentUser = {
-                    username: username,
-                    role: authorizer.isSuperUser()
-                      ? authorizer.getAllPrivilegesArray()
-                      : authorizer.getCurrentUserPreviliges(),
-                    authorizedLocations: authorizedLocations
-                  };
-                  var sessionCookie =
-                    res.headers['set-cookie'] &&
-                    res.headers['set-cookie'].length > 0
-                      ? res.headers['set-cookie'][0]
-                      : session.session;
-                  cache.saveToCache(key, {
-                    result: result,
-                    currentUser: currentUser,
-                    session: sessionCookie
-                  });
-                  currentUser.session = sessionCookie;
-                  requestConfig.setAuthorization(sessionCookie);
-                  callback(null, result.authenticated, currentUser);
-                }
-              );
-            } else {
-              console.log(
-                'An error occurred while trying to validate; user is not authenticated'
-              );
-              callback(null, false);
-            }
-          });
-        })
-        .on('error', function (error) {
-          //console.log(error);
-          callback(null, false);
-        });
-    } catch (ex) {
-      console.log('An error occurred while trying to validate', ex);
-      callback(null, false);
-    }
+    var currentUser = {
+      username: 'fmaiko',
+      role: [],
+      authorizedLocations: []
+    };
+    callback(null, true, currentUser);
   };
 
   var HapiSwaggerOptions = {
@@ -175,29 +92,11 @@ try {
         }
       },
       {
-        register: Basic,
-        options: {}
-      },
-      {
-        register: hapiAuthorization,
-        options: {
-          roles: authorizer.getAllPrivilegesArray()
-        }
-      },
-      {
         register: Good,
         options: {
           reporters: []
         }
-      },
-      {
-        register: locationAuthorizer,
-        options: {}
       }
-      // {
-      //   'register': Nes,
-      //   'options': etlBroadcast.getOptions(server)
-      // }
     ],
 
     function (err) {
@@ -205,9 +104,6 @@ try {
         console.error(err);
         throw err; // something bad happened loading the plugin
       }
-      server.auth.strategy('simple', 'basic', 'required', {
-        validateFunc: validate
-      });
 
       //Adding routes
       for (var route in routes) {
@@ -218,17 +114,13 @@ try {
         }
       }
 
-      for (var route in elasticRoutes) {
-        server.route(elasticRoutes[route]);
-      }
-
       server.on('response', function (request) {
         if (request.response === undefined || request.response === null) {
           console.log('No response');
         } else {
           var user = '';
-          if (request.auth && request.auth.credentials)
-            user = request.auth.credentials.username;
+          //if (request.auth && request.auth.credentials)
+          user = 'Test';
           console.log(
             'Username:',
             user +
@@ -247,23 +139,11 @@ try {
       });
 
       server.ext('onPreResponse', corsHeaders);
-
-      if (config.clusteringEnabled === true && cluster.isMaster) {
-        for (var i = 0; i < numCPUs; i++) {
-          cluster.fork();
-        }
-
-        cluster.on('exit', function (worker, code, signal) {
-          //refork the cluster
-          //cluster.fork();
-        });
-      } else {
-        //TODO start HAPI server here
-        server.start(function () {
-          console.log('info', 'Server running at: ' + server.info.uri);
-          server.log('info', 'Server running at: ' + server.info.uri);
-        });
-      }
+      //TODO start HAPI server here
+      server.start(function () {
+        console.log('info', 'Server running at: ' + server.info.uri);
+        server.log('info', 'Server running at: ' + server.info.uri);
+      });
     }
   );
   module.exports = server;
