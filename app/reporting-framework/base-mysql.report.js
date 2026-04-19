@@ -559,6 +559,8 @@ import * as service_queue_daily_aggregate from './json-reports/service-queue-dai
 import * as service_queue_daily_base from './json-reports/service-queue-daily-base.json';
 import * as service_queue_patient_list_template from './json-reports/service-queue-patient-list-template.json';
 
+// moh740 report
+import * as diabetes_and_hypertention_comprehensive_care_report from './json-reports/diabetes-and-hypertention-comprehensive-care-aggregate.json';
 export class BaseMysqlReport {
   constructor(reportName, params) {
     this.reportName = reportName;
@@ -2478,6 +2480,13 @@ export class BaseMysqlReport {
         case 'service-queue-patient-list-template':
           resolve({
             main: this.cloneJsonSchema(service_queue_patient_list_template)
+          });
+          break;
+        case 'MOH-740-report':
+          resolve({
+            main: this.cloneJsonSchema(
+              diabetes_and_hypertention_comprehensive_care_report
+            )
           });
           break;
         default:
