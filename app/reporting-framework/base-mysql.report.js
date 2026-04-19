@@ -564,6 +564,8 @@ import * as diabetes_and_hypertention_comprehensive_care_report from './json-rep
 import * as moh_740_report from './json-reports/moh-740/moh-740-report.json';
 import * as diabetes_and_hypertention_comprehensive_care_report_aggregate from './json-reports/diabetes-and-hypertention-comprehensive-care-aggregate.json';
 import * as diabetes_and_hypertention_comprehensive_care_report_base from './json-reports/diabetes-and-hypertention-comprehensive-care-base.json';
+import * as diabetes_type_age_gender_disaggregation from './json-reports/diabetes-type-age-gender-disaggregate.json';
+import * as diabetes_type_age_base from './json-reports/diabetes-type-age-base.json';
 export class BaseMysqlReport {
   constructor(reportName, params) {
     this.reportName = reportName;
@@ -2502,6 +2504,12 @@ export class BaseMysqlReport {
               diabetes_and_hypertention_comprehensive_care_report_base
             )
           });
+        case 'diabetesTypeAgeGenderDisaggregation':
+          resolve({
+            main: this.cloneJsonSchema(diabetes_type_age_gender_disaggregation),
+            diabetesTypeAgeBase: this.cloneJsonSchema(diabetes_type_age_base)
+          });
+          break;
           break;
       }
     });
