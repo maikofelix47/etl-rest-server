@@ -99,6 +99,7 @@ import {
 import SmsService from './service/login-otp/sms.service.js';
 import { DashboardSummaryService } from './service/dashboard-summary/dashboard-summary.service.js';
 import { ServiceQueueDailyReportService } from './service/queues/queue-entry/service-queue-report.service.js';
+import { Moh740Service } from './service/moh-740/moh-740.service.js';
 
 module.exports = (function () {
   var routes = [
@@ -6928,6 +6929,48 @@ module.exports = (function () {
         description: 'Service Queue Daily report Patient List',
         notes: 'Service Queue Daily report Patient List',
         tags: ['api']
+      }
+    },
+    {
+      method: 'GET',
+      path: '/moh-740-report',
+      config: {
+        auth: false,
+        handler: async function (request, reply) {
+          console.log('get moh 740 report...');
+          if (request.query.locationUuids) {
+            preRequest.resolveLocationIdsToLocationUuids(request, function () {
+              let requestParams = Object.assign(
+                {},
+                request.query,
+                request.params
+              );
+              let reportParams = etlHelpers.getReportParams(
+                'moh-740-report',
+                ['startDate', 'endDate', 'locationUuids'],
+                requestParams
+              );
+              let report = 'MOH-740-report';
+
+              const moh740Service = new Moh740Service(
+                report,
+                reportParams.requestParams
+              );
+              moh740Service
+                .generateReport()
+                .then((result) => {
+                  reply(result);
+                })
+                .catch((error) => {
+                  reply(error);
+                });
+            });
+          }
+        },
+        description: 'Get MOH-740 Monthly report summary',
+        notes: 'MOH-740 report',
+        tags: ['api'],
+        validate: {}
       }
     }
   ];

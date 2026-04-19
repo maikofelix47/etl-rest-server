@@ -18,6 +18,7 @@ export class Moh740Service extends MultiDatasetPatientlistReport {
             resolve(results);
           } else {
             let finalResult = [];
+            console.log({ results });
             const reportProcessorHelpersService = new ReportProcessorHelpersService();
             for (let result of results) {
               if (
@@ -41,8 +42,7 @@ export class Moh740Service extends MultiDatasetPatientlistReport {
 
             resolve({
               queriesAndSchemas: results,
-              result: finalResult,
-              indicatorDefinitions: []
+              result: finalResult
             });
           }
         })

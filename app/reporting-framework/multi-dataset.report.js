@@ -46,6 +46,7 @@ export class MultiDatasetReport extends BaseMysqlReport {
   _intializeReportHandlers() {
     let that = this;
     let handlers = [];
+    console.log('reportSchemas', this.reportSchemas);
     this.reportSchemas.main.reports.forEach((report) => {
       handlers.push(this.getReportHandler(report, that.params));
     });

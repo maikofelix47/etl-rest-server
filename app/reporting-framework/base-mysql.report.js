@@ -561,6 +561,9 @@ import * as service_queue_patient_list_template from './json-reports/service-que
 
 // moh740 report
 import * as diabetes_and_hypertention_comprehensive_care_report from './json-reports/diabetes-and-hypertention-comprehensive-care-aggregate.json';
+import * as moh_740_report from './json-reports/moh-740/moh-740-report.json';
+import * as diabetes_and_hypertention_comprehensive_care_report_aggregate from './json-reports/diabetes-and-hypertention-comprehensive-care-aggregate.json';
+import * as diabetes_and_hypertention_comprehensive_care_report_base from './json-reports/diabetes-and-hypertention-comprehensive-care-base.json';
 export class BaseMysqlReport {
   constructor(reportName, params) {
     this.reportName = reportName;
@@ -2484,13 +2487,21 @@ export class BaseMysqlReport {
           break;
         case 'MOH-740-report':
           resolve({
-            main: this.cloneJsonSchema(
-              diabetes_and_hypertention_comprehensive_care_report
-            )
+            main: this.cloneJsonSchema(moh_740_report)
           });
           break;
         default:
           reject('Unknown report ', reportName);
+          break;
+        case 'diabetesAndHypertentionComprehensiveCareReportAggregate':
+          resolve({
+            main: this.cloneJsonSchema(
+              diabetes_and_hypertention_comprehensive_care_report_aggregate
+            ),
+            diabetesAndHypertentionComprehensiveCareReportBase: this.cloneJsonSchema(
+              diabetes_and_hypertention_comprehensive_care_report_base
+            )
+          });
           break;
       }
     });

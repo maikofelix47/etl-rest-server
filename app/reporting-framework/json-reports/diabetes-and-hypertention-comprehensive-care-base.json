@@ -21,6 +21,11 @@
       "column": "mdh.cumulative_in_care"
     },
     {
+      "type": "simple_column",
+      "alias": "newly_diagnosed_diabetes_this_month",
+      "column": "mdh.newly_diagnosed_diabetes_this_month"
+    },
+    {
       "type": "derived_column",
       "alias": "revisit_to_clinic_known_dm",
       "expressionType": "simple_expression",
@@ -61,11 +66,6 @@
       {
         "filterType": "tableColumns",
         "conditionExpression": "mdh.endDate = ?",
-        "parameterName": "endDate"
-      },
-      {
-        "filterType": "tableColumns",
-        "conditionExpression": "DATE(fccs.encounter_datetime) <= ?",
         "parameterName": "endDate"
       },
       {
