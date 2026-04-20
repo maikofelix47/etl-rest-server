@@ -1,5 +1,5 @@
 {
-  "name": "diabetesAndHypertentionComprehensiveCareReportAggregate",
+  "name": "diabetesAndHypertentionComprehensiveCareReportDisAggregation",
   "version": "1.0",
   "tag": "",
   "description": "",
@@ -24,8 +24,8 @@
     },
     {
       "type": "simple_column",
-      "alias": "endDate",
-      "column": "endDate"
+      "alias": "gender",
+      "column": "b.gender"
     },
     {
       "type": "derived_column",
@@ -58,18 +58,26 @@
       "expressionOptions": {
         "expression": "COUNT(b.type_2_diabetes)"
       }
+    },
+    {
+      "type": "derived_column",
+      "alias": "cumulative_htn_patient",
+      "expressionType": "simple_expression",
+      "expressionOptions": {
+        "expression": "COUNT(b.cumulative_htn_patient)"
+      }
     }
   ],
   "groupBy": {
     "groupParam": "groupByParam",
-    "columns": ["b.location_id", "b.endDate"],
+    "columns": ["b.location_id", "gender"],
     "excludeParam": "excludeParam"
   },
   "transFormDirectives": {
     "joinColumn": "location_id",
-    "joinColumnParam": "",
-    "skipColumns": [""],
-    "disaggregationColumns": []
+    "skipColumns": ["location_uuid", "join_location"],
+    "joinColumnParam": "joinColumnParam",
+    "disaggregationColumns": ["gender"]
   },
   "dynamicJsonQueryGenerationDirectives": {
     "patientListGenerator": {

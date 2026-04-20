@@ -1,6 +1,7 @@
 {
   "reports": [
-    "diabetesAndHypertentionComprehensiveCareReportAggregate",
-    "diabetesTypeAgeGenderDisaggregation"
+    "diabetesAndHypertentionComprehensiveCareReportDisAggregation",
+    "diabetesTypeAgeGenderDisaggregation",
+    "hypertentionAgeGenderDisaggregation"
   ]
 }

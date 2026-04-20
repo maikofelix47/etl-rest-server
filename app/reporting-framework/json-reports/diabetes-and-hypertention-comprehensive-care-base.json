@@ -51,8 +51,18 @@
     },
     {
       "type": "simple_column",
+      "alias": "cumulative_htn_patient",
+      "column": "mdh.cumulative_htn_patient"
+    },
+    {
+      "type": "simple_column",
       "alias": "location_id",
       "column": "mdh.location_id"
+    },
+    {
+      "type": "simple_column",
+      "alias": "gender",
+      "column": "mdh.gender"
     },
     {
       "type": "simple_column",
