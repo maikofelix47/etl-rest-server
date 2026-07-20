@@ -111,7 +111,7 @@ WHERE
         AND c.uuid = '${serviceUuid}'
         AND l.uuid = '${locationUuid}'
         AND qe.voided = 0
-GROUP BY qe.patient_id , qe.visit_id;`;
+GROUP BY qe.patient_id;`;
       const queryParts = {
         sql: sql
       };
