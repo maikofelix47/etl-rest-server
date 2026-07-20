@@ -14,6 +14,7 @@ export class ServiceEntry {
       const sql = `SELECT 
     q.name,
     qe.patient_id,
+    CONCAT(id.identifier, ',', cr.identifier) AS 'identifiers',
     qe.queue_entry_id,
     qe.priority_comment,
     TIMESTAMPDIFF(MINUTE,
@@ -40,9 +41,9 @@ export class ServiceEntry {
         WHEN qe.status = 1267 THEN 'COMPLETED'
     END AS 'status',
     CASE
-       WHEN qe.priority = 11666 THEN 'PRIORITY'
-       WHEN qe.priority = 12360 THEN 'EMERGENCY'
-       WHEN qe.priority = 7316 THEN 'NON-URGENT'
+        WHEN qe.priority = 11666 THEN 'PRIORITY'
+        WHEN qe.priority = 12360 THEN 'EMERGENCY'
+        WHEN qe.priority = 7316 THEN 'NON-URGENT'
     END AS 'priority',
     v.uuid AS 'visit_uuid',
     qf.name AS 'queue_coming_from',
@@ -53,9 +54,7 @@ export class ServiceEntry {
     IF(cb.patient_id IS NOT NULL, 1, 0) AS 'hide_in_queue',
     GROUP_CONCAT(DISTINCT contacts.value
         SEPARATOR ', ') AS 'phone_number',
-    EXTRACT(YEAR FROM (FROM_DAYS(DATEDIFF(NOW(), p.birthdate)))) AS 'age',
-    GROUP_CONCAT(DISTINCT id.identifier
-        SEPARATOR ', ') AS 'identifiers'
+    EXTRACT(YEAR FROM (FROM_DAYS(DATEDIFF(NOW(), p.birthdate)))) AS 'age'
 FROM
     amrs.queue_entry qe
         JOIN
@@ -79,7 +78,13 @@ FROM
         AND contacts.person_attribute_type_id IN (10 , 48))
         LEFT JOIN
     amrs.patient_identifier id ON (p.person_id = id.patient_id
-        AND (id.voided IS NULL || id.voided = 0))
+        AND (id.voided IS NULL
+        || id.voided = 0 AND id.identifier_type = 5))
+        LEFT JOIN
+    amrs.patient_identifier cr ON (p.person_id = cr.patient_id
+        AND (cr.voided IS NULL
+        || cr.voided = 0
+        AND cr.identifier_type = 55))
         JOIN
     amrs.visit v ON (v.visit_id = qe.visit_id)
         LEFT JOIN
@@ -88,7 +93,7 @@ FROM
     (SELECT 
         cb.patient_id,
             cb.status AS 'bill_status',
-            bi.payment_status AS 'bill_item_payment_status',
+            bi.status AS 'bill_item_payment_status',
             bi.price_name,
             bi.date_changed AS 'bill_item_updated_at'
     FROM
@@ -98,8 +103,8 @@ FROM
         DATE(cb.date_created) = DATE(NOW())
             AND cb.voided = 0
             AND bi.voided = 0
-            AND bi.price_name IN ('MPESA','Cash')
-            AND bi.payment_status != 'PAID'
+            AND bi.price_name IN ('MPESA' , 'Cash')
+            AND bi.status != 'PAID'
     GROUP BY cb.patient_id) cb ON (cb.patient_id = qe.patient_id)
 WHERE
     qe.ended_at IS NULL
@@ -107,73 +112,6 @@ WHERE
         AND l.uuid = '${locationUuid}'
         AND qe.voided = 0
 GROUP BY qe.patient_id , qe.visit_id;`;
-      const queryParts = {
-        sql: sql
-      };
-      db.queryServer(queryParts, function (result) {
-        result.sql = sql;
-        resolve(result.result);
-      });
-    });
-  }
-  getQueueEntriesByLocationAndDateRange(locationUuid, startDate, endDate) {
-    if (!locationUuid) {
-      throw new Error('Location not defined');
-    }
-    if (!startDate) {
-      throw new Error('Start Date not defined');
-    }
-    if (!endDate) {
-      throw new Error('EndDate not defined');
-    }
-    return new Promise((resolve, reject) => {
-      const sql = `SELECT 
-    qe.patient_id,
-    DATE_FORMAT(qe.started_at,'%Y-%m-%d') AS reg_date,
-    l.name AS 'location',
-    p.uuid AS 'patient_uuid',
-    UPPER(CONCAT_WS(' ',
-                    pn.given_name,
-                    pn.middle_name,
-                    pn.family_name)) AS patient_name,
-    v.uuid AS 'visit_uuid',
-    GROUP_CONCAT(DISTINCT contacts.value
-        SEPARATOR ', ') AS 'phone_number',
-    EXTRACT(YEAR FROM (FROM_DAYS(DATEDIFF(NOW(), p.birthdate)))) AS 'age',
-    GROUP_CONCAT(DISTINCT id.identifier
-        SEPARATOR ', ') AS 'identifiers'
-FROM
-    amrs.queue_entry qe
-        JOIN
-    amrs.queue q ON (qe.queue_id = q.queue_id)
-        JOIN
-    amrs.concept c ON (q.service = c.concept_id)
-        LEFT JOIN
-    amrs.queue_room qr ON (qr.queue_id = q.queue_id
-        AND qr.retired = 0)
-        JOIN
-    amrs.location l ON (q.location_id = l.location_id)
-        JOIN
-    amrs.person p ON (p.person_id = qe.patient_id)
-        JOIN
-    amrs.person_name pn ON (pn.person_id = p.person_id
-        AND pn.voided = 0)
-        LEFT JOIN
-    amrs.person_attribute contacts ON (p.person_id = contacts.person_id
-        AND (contacts.voided IS NULL
-        || contacts.voided = 0)
-        AND contacts.person_attribute_type_id IN (10 , 48))
-        LEFT JOIN
-    amrs.patient_identifier id ON (p.person_id = id.patient_id
-        AND (id.voided IS NULL || id.voided = 0))
-        JOIN
-    amrs.visit v ON (v.visit_id = qe.visit_id)
-WHERE
-        DATE(qe.started_at) >= '${startDate}'
-        AND DATE(qe.started_at) <= '${endDate}'
-        AND l.uuid = '${locationUuid}'
-        AND qe.voided = 0
-GROUP BY qe.patient_id;`;
       const queryParts = {
         sql: sql
       };
